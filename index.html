@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Pesquisas Lula x Flávio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+/* Layout: coluna única de leitura, números no topo, gráfico largo, tabela e método embaixo */
+:root{
+  --font-anthropic-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-anthropic-serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --cds-font-size-title:2rem;--cds-font-size-heading:1.125rem;--cds-font-size-body:.95rem;--cds-font-size-caption:.78rem;
+  --cds-font-weight-medium:600;
+  --cds-gap-xs:.25rem;--cds-gap-sm:.5rem;--cds-gap-md:.875rem;--cds-gap-lg:1.5rem;
+  --cds-pad-xs:.3rem;--cds-pad-sm:.6rem;--cds-pad-lg:1.1rem;
+  --cds-radius:8px;--cds-dur-slow:.3s;
+  --color-bg:#f6f7f9;--color-panel:#ffffff;--color-fg:#1b2230;--color-fg-muted:#5c6577;--color-border-line:#dfe3ea;--color-bad:#c23b3b;
+  --cds-surface-popover:#ffffff;--cds-border:#d3d8e1;--cds-shadow-popover:0 4px 14px rgba(20,30,50,.12);--cds-text-secondary:#5c6577;
+  --cds-chart-grid:#eceff4;--cds-chart-reference:#9aa3b2;--cds-chart-axis:#b4bbc7;--cds-chart-muted:#8c95a5;
+  --c-flavio:#2462c4;--c-lula:#d4572e;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --color-bg:#12161d;--color-panel:#1a2029;--color-fg:#e7eaf0;--color-fg-muted:#9aa3b3;--color-border-line:#2b3340;--color-bad:#e36a6a;
+  --cds-surface-popover:#202734;--cds-border:#364051;--cds-shadow-popover:0 4px 14px rgba(0,0,0,.45);--cds-text-secondary:#9aa3b3;
+  --cds-chart-grid:#232a35;--cds-chart-reference:#6b7486;--cds-chart-axis:#4a5363;--cds-chart-muted:#7d8697;
+  --c-flavio:#6b9df0;--c-lula:#f08a5f;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --color-bg:#12161d;--color-panel:#1a2029;--color-fg:#e7eaf0;--color-fg-muted:#9aa3b3;--color-border-line:#2b3340;--color-bad:#e36a6a;
+  --cds-surface-popover:#202734;--cds-border:#364051;--cds-shadow-popover:0 4px 14px rgba(0,0,0,.45);--cds-text-secondary:#9aa3b3;
+  --cds-chart-grid:#232a35;--cds-chart-reference:#6b7486;--cds-chart-axis:#4a5363;--cds-chart-muted:#7d8697;
+  --c-flavio:#6b9df0;--c-lula:#f08a5f;color-scheme:dark}
+body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);padding-block:24px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pq{max-width:1100px;margin:0 auto}
+.pq-upd{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:0}
+.pq-toggle{flex-wrap:wrap}
+</style>
+<style>
+.pq{display:flex;flex-direction:column;gap:var(--cds-gap-lg);font-family:var(--font-anthropic-sans)}
+.pq-head h1{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin:0;text-wrap:balance}
+.pq-take{color:var(--color-fg-muted);font-size:var(--cds-font-size-body);margin:var(--cds-gap-xs) 0 0;max-width:62ch}
+.pq-take b{font-weight:var(--cds-font-weight-medium);color:var(--color-fg)}
+.pq-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:var(--cds-gap-md)}
+.pq-tile,.pq-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);min-width:0}
+.pq-tile .lab{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.pq-tile .val{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);font-variant-numeric:tabular-nums;margin-top:var(--cds-gap-xs);min-height:1.2em}
+.pq-tile .sub{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-top:var(--cds-gap-xs)}
+.pq-card h2{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0}
+.pq-note{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:var(--cds-gap-xs) 0 var(--cds-gap-md);max-width:70ch}
+.pq-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--cds-gap-sm);margin-bottom:var(--cds-gap-sm)}
+.pq-legend{display:flex;flex-wrap:wrap;gap:var(--cds-gap-md);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.pq-legend span{display:inline-flex;align-items:center;gap:6px}
+.pq-sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+.pq-dia{width:9px;height:9px;transform:rotate(45deg);background:var(--cds-chart-muted);display:inline-block}
+.pq-ring{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--cds-chart-muted);display:inline-block;box-sizing:border-box}
+.pq-toggle{display:flex;gap:var(--cds-gap-xs);align-items:center;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.pq-toggle button{font:inherit;padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg);cursor:pointer}
+.pq-toggle button[aria-pressed="true"]{border-color:var(--color-fg);font-weight:var(--cds-font-weight-medium)}
+.pq-toggle button:focus-visible{outline:2px solid var(--color-fg);outline-offset:2px}
+.pq-chartbox{position:relative;min-height:440px}
+.pq-chartbox svg{display:block}
+.pq-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);white-space:nowrap;z-index:2}
+.pq-tip .d{color:var(--cds-text-secondary);margin-bottom:2px}
+.pq-tip .r{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.pq-tablebox{max-height:28rem;overflow:auto}
+.pq-table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size-body);font-variant-numeric:tabular-nums}
+.pq-table th{position:sticky;top:0;background:var(--color-panel);text-align:left;font-weight:var(--cds-font-weight-medium);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line)}
+.pq-table td{padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line)}
+.pq-table .num{text-align:right}
+.pq-method p{margin:0 0 var(--cds-gap-sm);font-size:var(--cds-font-size-body);max-width:70ch}
+.pq-method p:last-child{margin-bottom:0}
+.pq [data-dash-source-state=empty]{color:transparent}
+.pq [data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+.pq-fail{display:flex;align-items:center;justify-content:center;gap:6px;min-height:440px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.pq-fail i{width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad);display:inline-block}
+</style>
+
+</head>
+<body>
+<div class="pq">
+  <header class="pq-head" id="topo">
+    <h1>Pesquisas Lula x Flávio</h1>
+    <p class="pq-upd">2º turno de 2026 · atualizado em 21/10/2026</p>
+    <p class="pq-take">
+      <span class="pq-modo">Média aparada da última semana</span>, em votos válidos:
+      Flávio <b id="tkF" class="dash-skeleton" data-source="media_atual" data-field="flavio" data-where="janela=ap">—</b>
+      × Lula <b id="tkL" class="dash-skeleton" data-source="media_atual" data-field="lula" data-where="janela=ap">—</b>.
+      Na urna do 1º turno, contando só os dois, deu Flávio
+      <b id="tkUF" class="dash-skeleton" data-source="pesquisas" data-field="flavio" data-where="fase=urna">—</b>
+      × Lula <b id="tkUL" class="dash-skeleton" data-source="pesquisas" data-field="lula" data-where="fase=urna">—</b>.
+    </p>
+  </header>
+
+  <section class="pq-tiles" aria-label="Média atual">
+    <div class="pq-tile">
+      <div class="lab">Flávio Bolsonaro · <span class="pq-modo-curto">média aparada</span></div>
+      <div class="val dash-skeleton" id="tF" data-source="media_atual" data-field="flavio" data-where="janela=ap">—</div>
+    </div>
+    <div class="pq-tile">
+      <div class="lab">Lula · <span class="pq-modo-curto">média aparada</span></div>
+      <div class="val dash-skeleton" id="tL" data-source="media_atual" data-field="lula" data-where="janela=ap">—</div>
+    </div>
+    <div class="pq-tile">
+      <div class="lab">Diferença (pontos)</div>
+      <div class="val dash-skeleton" id="tD" data-source="media_atual" data-field="dif" data-where="janela=ap">—</div>
+    </div>
+    <div class="pq-tile">
+      <div class="lab">Pesquisas na média</div>
+      <div class="val dash-skeleton" id="tN" data-source="media_atual" data-field="n" data-where="janela=ap">—</div>
+    </div>
+  </section>
+
+  <section class="pq-card" id="grafico">
+    <h2>Todas as pesquisas de 2º turno e a média móvel</h2>
+    <p class="pq-note">Cada ponto é uma pesquisa, em votos válidos, como o instituto divulgou. A linha grossa é a <span class="pq-modo-nota">média aparada da última semana: em cada ponto, a pesquisa mais recente de cada instituto nos 7 dias anteriores, descartando 15% dos valores mais altos e 15% dos mais baixos</span>. Ela nunca olha para frente e não mistura antes e depois do 1º turno.</p>
+    <div class="pq-bar">
+      <div class="pq-legend" id="legenda" data-source="pesquisas medias">
+        <span><i class="pq-sw" id="swF"></i>Flávio</span>
+        <span><i class="pq-sw" id="swL"></i>Lula (tracejado)</span>
+        <span><i class="pq-dia"></i>Urna 1º turno</span>
+        <span><i class="pq-ring"></i>Agendada</span>
+      </div>
+      <div class="pq-toggle" role="group" aria-label="Janela da média">
+        Média:
+        <button type="button" id="bap" aria-pressed="true">Aparada, 1 por instituto</button>
+        <button type="button" id="b3" aria-pressed="false">3 dias</button>
+        <button type="button" id="b5" aria-pressed="false">5 dias</button>
+      </div>
+    </div>
+    <div class="pq-chartbox" id="chart" data-source="pesquisas medias"></div>
+  </section>
+
+  <section class="pq-card" id="tabela">
+    <h2>Pesquisas depois do 1º turno</h2>
+    <p class="pq-note">Da mais recente para a mais antiga. Votos válidos.</p>
+    <div class="pq-tablebox">
+      <table class="pq-table" data-source="pesquisas" data-row-key="id">
+        <thead><tr>
+          <th data-field="instituto">Instituto</th>
+          <th data-field="data">Divulgação</th>
+          <th class="num" data-field="flavio">Flávio</th>
+          <th class="num" data-field="lula">Lula</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="pq-card pq-method" id="metodo">
+    <h2>Como ler</h2>
+    <p>Os números são os divulgados pelos institutos, sem correção de viés. Testamos corrigir cada instituto pelo erro histórico, mas a correção afastava as pesquisas umas das outras em vez de aproximá-las, então ficou de fora.</p>
+    <p>A média padrão é a aparada: usa só a pesquisa mais recente de cada instituto na última semana, para que quem publica mais não pese mais, e descarta os valores extremos dos dois lados. Assim ela não pula quando uma pesquisa isolada entra ou sai da conta. As médias simples de 3 e 5 dias ficam nos botões para comparar: a de 3 reage mais rápido, a de 5 é mais estável.</p>
+    <p>As linhas pontilhadas marcam os debates da Band (18/10) e da Globo (23/10). Pesquisas com campo terminado antes de um debate não captam o efeito dele.</p>
+  </section>
+</div>
+
+<script>
+const DATA={pesquisas:[{"id": "1", "ordem": "1", "instituto": "AtlasIntel", "data": "2026-10-02", "dia": "-0.5", "fase": "pre", "flavio": "49.9", "lula": "50.1"}, {"id": "2", "ordem": "2", "instituto": "Vox Brasil", "data": "2026-10-01", "dia": "0", "fase": "pre", "flavio": "51.6", "lula": "48.4"}, {"id": "3", "ordem": "3", "instituto": "MDA", "data": "2026-10-02", "dia": "0.5", "fase": "pre", "flavio": "47.8", "lula": "52.2"}, {"id": "4", "ordem": "4", "instituto": "PoderData", "data": "2026-10-02", "dia": "1", "fase": "pre", "flavio": "50.0", "lula": "50.0"}, {"id": "5", "ordem": "5", "instituto": "Palver", "data": "2026-10-03", "dia": "1.5", "fase": "pre", "flavio": "52.7", "lula": "47.3"}, {"id": "6", "ordem": "6", "instituto": "Quaest", "data": "2026-10-03", "dia": "2.5", "fase": "pre", "flavio": "51.2", "lula": "48.8"}, {"id": "7", "ordem": "7", "instituto": "Futura", "data": "2026-10-03", "dia": "2.6", "fase": "pre", "flavio": "51.6", "lula": "48.4"}, {"id": "8", "ordem": "8", "instituto": "Datafolha", "data": "2026-10-03", "dia": "3", "fase": "pre", "flavio": "49.5", "lula": "50.5"}, {"id": "9", "ordem": "9", "instituto": "Urna 1º turno (só os dois)", "data": "2026-10-04", "dia": "4", "fase": "urna", "flavio": "51.0", "lula": "49.0"}, {"id": "10", "ordem": "10", "instituto": "AtlasIntel", "data": "2026-10-08", "dia": "5.5", "fase": "pos", "flavio": "52.8", "lula": "47.2"}, {"id": "11", "ordem": "11", "instituto": "Vox Brasil", "data": "2026-10-07", "dia": "6", "fase": "pos", "flavio": "49.1", "lula": "50.9"}, {"id": "12", "ordem": "12", "instituto": "PoderData", "data": "2026-10-07", "dia": "6.1", "fase": "pos", "flavio": "53.0", "lula": "47.0"}, {"id": "13", "ordem": "13", "instituto": "Datafolha", "data": "2026-10-07", "dia": "6.5", "fase": "pos", "flavio": "52.0", "lula": "48.0"}, {"id": "14", "ordem": "14", "instituto": "Ipespe", "data": "2026-10-08", "dia": "7", "fase": "pos", "flavio": "52.7", "lula": "47.3"}, {"id": "15", "ordem": "15", "instituto": "DataTrends", "data": "2026-10-09", "dia": "8", "fase": "pos", "flavio": "53.1", "lula": "46.9"}, {"id": "39", "ordem": "16", "instituto": "Futura", "data": "2026-10-10", "dia": "9.2", "fase": "pos", "flavio": "51.8", "lula": "48.2"}, {"id": "16", "ordem": "17", "instituto": "Gerp", "data": "2026-10-12", "dia": "10", "fase": "pos", "flavio": "55.0", "lula": "45.0"}, {"id": "17", "ordem": "18", "instituto": "BTG/Nexus", "data": "2026-10-12", "dia": "11", "fase": "pos", "flavio": "52.0", "lula": "48.0"}, {"id": "18", "ordem": "19", "instituto": "PoderData", "data": "2026-10-12", "dia": "11.1", "fase": "pos", "flavio": "51.0", "lula": "49.0"}, {"id": "19", "ordem": "20", "instituto": "Quaest", "data": "2026-10-14", "dia": "12.5", "fase": "pos", "flavio": "51.1", "lula": "48.9"}, {"id": "20", "ordem": "21", "instituto": "Indexa", "data": "2026-10-14", "dia": "13", "fase": "pos", "flavio": "51.0", "lula": "49.0"}, {"id": "21", "ordem": "22", "instituto": "Palver", "data": "2026-10-15", "dia": "13.8", "fase": "pos", "flavio": "50.5", "lula": "49.5"}, {"id": "22", "ordem": "23", "instituto": "Datafolha", "data": "2026-10-15", "dia": "14", "fase": "pos", "flavio": "51.0", "lula": "49.0"}, {"id": "23", "ordem": "24", "instituto": "CNT/MDA", "data": "2026-10-16", "dia": "14.3", "fase": "pos", "flavio": "50.5", "lula": "49.5"}, {"id": "24", "ordem": "25", "instituto": "PoderData", "data": "2026-10-16", "dia": "15", "fase": "pos", "flavio": "50.0", "lula": "50.0"}, {"id": "25", "ordem": "26", "instituto": "Gerp", "data": "2026-10-16", "dia": "15.5", "fase": "pos", "flavio": "52.0", "lula": "48.0"}, {"id": "26", "ordem": "27", "instituto": "Futura", "data": "2026-10-16", "dia": "15.6", "fase": "pos", "flavio": "50.8", "lula": "49.2"}, {"id": "27", "ordem": "28", "instituto": "Ipespe", "data": "2026-10-16", "dia": "15.7", "fase": "pos", "flavio": "51.2", "lula": "48.8"}, {"id": "40", "ordem": "29", "instituto": "Veritá", "data": "2026-10-17", "dia": "16.2", "fase": "pos", "flavio": "51.1", "lula": "48.9"}, {"id": "28", "ordem": "30", "instituto": "Vox Brasil", "data": "2026-10-18", "dia": "17", "fase": "pos", "flavio": "49.0", "lula": "51.0"}, {"id": "41", "ordem": "31", "instituto": "DataTrends", "data": "2026-10-18", "dia": "17.2", "fase": "pos", "flavio": "51.5", "lula": "48.5"}, {"id": "29", "ordem": "32", "instituto": "AtlasIntel", "data": "2026-10-19", "dia": "18", "fase": "pos", "flavio": "51.1", "lula": "48.9"}, {"id": "30", "ordem": "33", "instituto": "PoderData", "data": "2026-10-19", "dia": "18.1", "fase": "pos", "flavio": "52.0", "lula": "48.0"}, {"id": "31", "ordem": "34", "instituto": "BTG/Nexus", "data": "2026-10-19", "dia": "18.2", "fase": "pos", "flavio": "50.3", "lula": "49.7"}, {"id": "32", "ordem": "35", "instituto": "Futura", "data": "2026-10-19", "dia": "18.3", "fase": "pos", "flavio": "50.4", "lula": "49.6"}, {"id": "33", "ordem": "36", "instituto": "Real Time Big Data", "data": "2026-10-20", "dia": "19", "fase": "pos", "flavio": "52.0", "lula": "48.0"}, {"id": "42", "ordem": "37", "instituto": "Veritá", "data": "2026-10-20", "dia": "19.2", "fase": "pos", "flavio": "50.7", "lula": "49.3"}, {"id": "43", "ordem": "38", "instituto": "Alfa", "data": "2026-10-20", "dia": "19.3", "fase": "pos", "flavio": "51.5", "lula": "48.5"}, {"id": "34", "ordem": "39", "instituto": "Meio/Ideia", "data": "2026-10-21", "dia": "20", "fase": "pos", "flavio": "51.1", "lula": "48.9"}, {"id": "44", "ordem": "40", "instituto": "Palver", "data": "2026-10-21", "dia": "20.2", "fase": "pos", "flavio": "51.0", "lula": "49.0"}, {"id": "45", "ordem": "41", "instituto": "Futura", "data": "2026-10-21", "dia": "20.3", "fase": "pos", "flavio": "51.1", "lula": "48.9"}, {"id": "35", "ordem": "42", "instituto": "Quaest", "data": "2026-10-21", "dia": "20.5", "fase": "pos", "flavio": "50.6", "lula": "49.4"}, {"id": "46", "ordem": "43", "instituto": "Datafolha", "data": "2026-10-22", "dia": "21.0", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "47", "ordem": "44", "instituto": "Vox Brasil", "data": "2026-10-23", "dia": "22.0", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "48", "ordem": "45", "instituto": "Ipespe", "data": "2026-10-23", "dia": "22.05", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "49", "ordem": "46", "instituto": "Real Time Big Data", "data": "2026-10-23", "dia": "22.1", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "50", "ordem": "47", "instituto": "DataTrends", "data": "2026-10-23", "dia": "22.15", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "51", "ordem": "48", "instituto": "Alfa", "data": "2026-10-23", "dia": "22.2", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "52", "ordem": "49", "instituto": "Veritá", "data": "2026-10-23", "dia": "22.25", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "53", "ordem": "50", "instituto": "AtlasIntel", "data": "2026-10-24", "dia": "23.0", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "54", "ordem": "51", "instituto": "Datafolha", "data": "2026-10-24", "dia": "23.05", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "55", "ordem": "52", "instituto": "Quaest", "data": "2026-10-24", "dia": "23.1", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "56", "ordem": "53", "instituto": "BTG/Nexus", "data": "2026-10-24", "dia": "23.15", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "57", "ordem": "54", "instituto": "Palver", "data": "2026-10-24", "dia": "23.2", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "58", "ordem": "55", "instituto": "CNT/MDA", "data": "2026-10-24", "dia": "23.25", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "59", "ordem": "56", "instituto": "Paraná Pesquisas", "data": "2026-10-24", "dia": "23.3", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "60", "ordem": "57", "instituto": "Veritá", "data": "2026-10-24", "dia": "23.35", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "61", "ordem": "58", "instituto": "PoderData", "data": "2026-10-25", "dia": "23.8", "fase": "agendada", "flavio": "", "lula": ""}, {"id": "38", "ordem": "59", "instituto": "Eleição (2º turno)", "data": "2026-10-25", "dia": "24", "fase": "eleicao", "flavio": "", "lula": ""}]};
+const _cs=getComputedStyle(document.documentElement);
+const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',data:DATA[n]}),
+  get colors(){const s=getComputedStyle(document.documentElement);return [s.getPropertyValue('--c-flavio').trim(),s.getPropertyValue('--c-lula').trim()];},
+  onData:fn=>{fn();let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(fn,150);});
+    try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',fn);}catch(e){}
+    try{new MutationObserver(fn).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}}};
+(function(){
+  const fmt=v=>(v==null||isNaN(v))?'—':Number(v).toFixed(1).replace('.',',');
+  const dmy=s=>{const p=String(s).slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]:String(s);};
+  const num=x=>(x===''||x==null)?null:Number(x);
+
+  dash.calc('medias',{inputs:['pesquisas'],title:'Média móvel por pesquisa',
+    description:'Para cada pesquisa: a média aparada (a pesquisa mais recente de cada instituto nos 7 dias anteriores, sem os 15% mais altos e mais baixos, mínimo 4 institutos) e as médias simples dos 3 e 5 dias anteriores; separa antes e depois do 1º turno.',
+    fn:(pesquisas)=>{
+      const real=pesquisas.map(r=>({id:String(r.id),inst:String(r.instituto).replace('CNT/',''),dia:Number(r.dia),fase:r.fase,lula:(r.lula===''||r.lula==null)?null:Number(r.lula)})).filter(r=>(r.fase==='pre'||r.fase==='pos')&&r.lula!=null);
+      const m=(r,d,minN)=>{const w=real.filter(q=>q.fase===r.fase&&q.dia<=r.dia+0.01&&r.dia-q.dia<=d);if(w.length<minN)return null;return Math.round(w.reduce((s,q)=>s+q.lula,0)/w.length*10)/10;};
+      const ap=(r)=>{const w=real.filter(q=>q.fase===r.fase&&q.dia<=r.dia+0.01&&r.dia-q.dia<=7);const last=new Map();w.forEach(q=>{const k=q.inst;if(!last.has(k)||last.get(k).dia<q.dia)last.set(k,q);});const v=[...last.values()].map(q=>q.lula).sort((a,b)=>a-b);if(v.length<4)return null;const k=Math.floor(v.length*0.15);const t=v.slice(k,v.length-k);return Math.round(t.reduce((s,x)=>s+x,0)/t.length*10)/10;};
+      const f=(l)=>l==null?null:Math.round((100-l)*10)/10;
+      return real.map(r=>{const l3=m(r,3,3),l5=m(r,5,4),la=ap(r);return {id:r.id,lula3:l3,flavio3:f(l3),lula5:l5,flavio5:f(l5),lulaap:la,flavioap:f(la)};});
+    }});
+
+  dash.calc('media_atual',{inputs:['pesquisas'],title:'Média atual',
+    description:'Média atual depois do 1º turno, contada a partir da pesquisa mais recente: aparada (a pesquisa mais recente de cada instituto nos últimos 7 dias, sem os 15% mais altos e mais baixos) e simples dos últimos 3 e 5 dias.',
+    fn:(pesquisas)=>{
+      const pos=pesquisas.filter(r=>r.fase==='pos'&&r.lula!==''&&r.lula!=null).map(r=>({inst:String(r.instituto).replace('CNT/',''),dia:Number(r.dia),lula:Number(r.lula)}));
+      if(!pos.length)return [];
+      const last=Math.max(...pos.map(r=>r.dia));
+      const row=(janela,v)=>{const l=Math.round(v.reduce((s,x)=>s+x,0)/v.length*10)/10;const f=Math.round((100-l)*10)/10;return {janela,flavio:f,lula:l,dif:Math.round((f-l)*10)/10,n:v.length};};
+      const w7=pos.filter(r=>last-r.dia<=7);const lastBy=new Map();w7.forEach(r=>{if(!lastBy.has(r.inst)||lastBy.get(r.inst).dia<r.dia)lastBy.set(r.inst,r);});
+      const v=[...lastBy.values()].map(r=>r.lula).sort((a,b)=>a-b);const k=Math.floor(v.length*0.15);const t=v.slice(k,v.length-k);
+      return [row('ap',t)].concat([3,5].map(d=>row(String(d),pos.filter(r=>last-r.dia<=d).map(r=>r.lula))));
+    }});
+
+  let win='ap';
+  const MODOS={ap:{curto:'média aparada',longo:'Média aparada da última semana',nota:'média aparada da última semana: em cada ponto, a pesquisa mais recente de cada instituto nos 7 dias anteriores, descartando 15% dos valores mais altos e 15% dos mais baixos',fim:'média aparada'},
+    '3':{curto:'média de 3 dias',longo:'Média simples dos últimos 3 dias',nota:'média simples das pesquisas dos 3 dias anteriores a cada ponto',fim:'média 3 dias'},
+    '5':{curto:'média de 5 dias',longo:'Média simples dos últimos 5 dias',nota:'média simples das pesquisas dos 5 dias anteriores a cada ponto',fim:'média 5 dias'}};
+  const DEBATES=[{nome:'Debate Band',dia:18.5},{nome:'Debate Globo',dia:22.5}];
+  const box=document.getElementById('chart');
+  const tip=document.createElement('div');tip.className='pq-tip';tip.hidden=true;
+
+  function setMarks(){
+    document.querySelectorAll('[data-source="media_atual"]').forEach(el=>el.setAttribute('data-where','janela='+win));
+    const m=MODOS[win];
+    document.querySelectorAll('.pq-modo').forEach(el=>{el.textContent=m.longo;});
+    document.querySelectorAll('.pq-modo-curto').forEach(el=>{el.textContent=m.curto;});
+    document.querySelectorAll('.pq-modo-nota').forEach(el=>{el.textContent=m.nota;});
+    [['bap','ap'],['b3','3'],['b5','5']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',String(win===v)));
+  }
+  [['bap','ap'],['b3','3'],['b5','5']].forEach(([id,v])=>document.getElementById(id).addEventListener('click',()=>{win=v;setMarks();draw();}));
+
+  function fail(el){el.classList.remove('dash-skeleton');el.innerHTML='';const d=document.createElement('div');d.className='pq-fail';const i=document.createElement('i');d.appendChild(i);d.appendChild(document.createTextNode('Failed to load'));el.appendChild(d);}
+
+  function draw(){
+    const P=dash.data('pesquisas'),M=dash.data('medias'),A=dash.data('media_atual');
+    const C=dash.colors||[];const cF=C[0],cL=C[1];
+    document.getElementById('swF').style.background=cF;document.getElementById('swL').style.background=cL;
+
+    // números do topo
+    const tiles=[['tF','flavio'],['tL','lula'],['tD','dif'],['tN','n'],['tkF','flavio'],['tkL','lula']];
+    if(A.status==='ok'){const row=(A.data||[]).find(r=>String(r.janela)===win);
+      tiles.forEach(([id,f])=>{const el=document.getElementById(id);el.classList.remove('dash-skeleton');el.textContent=row?(f==='n'?String(row[f]):fmt(row[f])):'—';});
+    }else{tiles.forEach(([id])=>{const el=document.getElementById(id);el.textContent='—';if(A.status!=='loading')el.classList.remove('dash-skeleton');});}
+
+    const tb=document.getElementById('tbody');
+    if(P.status!=='ok'){
+      ['tkUF','tkUL'].forEach(id=>{const el=document.getElementById(id);el.textContent='—';if(P.status!=='loading')el.classList.remove('dash-skeleton');});
+      tb.innerHTML='';box.innerHTML='';
+      if(P.status==='error')fail(box);
+      return;
+    }
+    const rows=(P.data||[]).map(r=>({id:String(r.id),ordem:Number(r.ordem),inst:String(r.instituto),data:String(r.data),dia:Number(r.dia),fase:String(r.fase),flavio:num(r.flavio),lula:num(r.lula)})).sort((a,b)=>a.ordem-b.ordem);
+    const urna=rows.find(r=>r.fase==='urna');
+    document.getElementById('tkUF').classList.remove('dash-skeleton');document.getElementById('tkUL').classList.remove('dash-skeleton');
+    document.getElementById('tkUF').textContent=urna?fmt(urna.flavio):'—';document.getElementById('tkUL').textContent=urna?fmt(urna.lula):'—';
+
+    // tabela
+    tb.innerHTML='';
+    rows.filter(r=>r.fase==='pos').slice().sort((a,b)=>b.ordem-a.ordem).forEach(r=>{
+      const tr=document.createElement('tr');tr.setAttribute('data-key',r.id);
+      [[r.inst,''],[r.data,''],[fmt(r.flavio),'num'],[fmt(r.lula),'num']].forEach(([t,c],i)=>{const td=document.createElement('td');if(c)td.className=c;td.textContent=i===1?dmy(t):t;tr.appendChild(td);});
+      tb.appendChild(tr);});
+
+    // gráfico
+    const med=new Map(((M.status==='ok'?M.data:[])||[]).map(r=>[String(r.id),r]));
+    box.innerHTML='';box.appendChild(tip);
+    const W=Math.max(300,box.clientWidth),H=440;
+    const narrow=W<640;
+    const ml=40,mr=narrow?44:56,mt=24,mb=narrow?78:96;
+    const x=d3.scalePoint(rows.map(r=>r.id),[ml,W-mr]).padding(0.5);
+    const y=d3.scaleLinear([42,58],[H-mb,mt]);
+    const svg=d3.select(box).append('svg').attr('width','100%').attr('viewBox',`0 0 ${W} ${H}`).attr('role','img').attr('aria-label','Pesquisas de segundo turno em votos válidos, com a média móvel');
+    const g=svg.append('g');
+    // grade
+    const yt=d3.range(42,59,2);
+    g.selectAll('line.gr').data(yt).join('line').attr('x1',ml).attr('x2',W-mr).attr('y1',d=>y(d)).attr('y2',d=>y(d)).attr('stroke','var(--cds-chart-grid)').attr('stroke-width',1);
+    g.selectAll('text.yt').data(yt).join('text').attr('x',ml-6).attr('y',d=>y(d)+4).attr('text-anchor','end').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text(d=>d+'%');
+    g.append('line').attr('x1',ml).attr('x2',W-mr).attr('y1',y(50)).attr('y2',y(50)).attr('stroke','var(--cds-chart-reference)').attr('stroke-width',1).attr('stroke-dasharray','4 3');
+    // rótulos do eixo x
+    const every=W>=1000?1:W>=700?2:4;
+    const xl=g.append('g');
+    rows.forEach((r,i)=>{if(i%every!==0&&r.fase!=='urna'&&r.fase!=='eleicao')return;const t=xl.append('text').attr('transform',`translate(${x(r.id)},${H-mb+12}) rotate(-55)`).attr('text-anchor','end').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)');t.append('tspan').text(r.inst.split(' ')[0].replace('(só','')+' '+dmy(r.data));});
+    // linhas de referência
+    const posOf=d=>{const i=rows.findIndex(r=>r.dia>d);if(i<=0)return null;return (x(rows[i-1].id)+x(rows[i].id))/2;};
+    const vline=(px,label,dash1)=>{if(px==null)return;g.append('line').attr('x1',px).attr('x2',px).attr('y1',mt-6).attr('y2',H-mb).attr('stroke','var(--cds-chart-axis)').attr('stroke-width',1).attr('stroke-dasharray',dash1);g.append('text').attr('transform',`translate(${px-4},${mt}) rotate(-90)`).attr('text-anchor','end').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text(label);};
+    if(urna)vline(x(urna.id),'',"4 3");
+    const lastReal=rows.filter(r=>r.lula!=null).slice(-1)[0];
+    const nextIdx=rows.findIndex(r=>r.ordem>lastReal.ordem);
+    if(nextIdx>0)vline((x(lastReal.id)+x(rows[nextIdx].id))/2,'hoje',"4 3");
+    DEBATES.forEach(d=>vline(posOf(d.dia),d.nome,"1 3"));
+    const el=rows.find(r=>r.fase==='eleicao');if(el)vline(x(el.id),'2º turno',"4 3");
+    // médias
+    const kF='flavio'+win,kL='lula'+win;
+    ['pre','pos'].forEach(fase=>{
+      const seg=rows.filter(r=>r.fase===fase&&med.has(r.id)&&med.get(r.id)[kL]!=null);
+      if(seg.length<2)return;
+      const ln=k=>d3.line().x(r=>x(r.id)).y(r=>y(med.get(r.id)[k]));
+      g.append('path').datum(seg).attr('d',ln(kF)).attr('fill','none').attr('stroke',cF).attr('stroke-width',2.5).attr('stroke-linecap','round').attr('stroke-linejoin','round');
+      g.append('path').datum(seg).attr('d',ln(kL)).attr('fill','none').attr('stroke',cL).attr('stroke-width',2.5).attr('stroke-dasharray','7 4');
+    });
+    // pontos
+    const reais=rows.filter(r=>(r.fase==='pre'||r.fase==='pos')&&r.lula!=null);
+    g.selectAll('circle.f').data(reais).join('circle').attr('cx',r=>x(r.id)).attr('cy',r=>y(r.flavio)).attr('r',3.5).attr('fill',cF).attr('fill-opacity',.55);
+    const tri=d3.symbol(d3.symbolTriangle,44);
+    g.selectAll('path.l').data(reais).join('path').attr('d',tri).attr('transform',r=>`translate(${x(r.id)},${y(r.lula)})`).attr('fill',cL).attr('fill-opacity',.55);
+    if(urna){const dia=d3.symbol(d3.symbolDiamond,70);[urna.flavio,urna.lula].forEach(v=>g.append('path').attr('d',dia).attr('transform',`translate(${x(urna.id)},${y(v)})`).attr('fill','var(--cds-chart-muted)'));}
+    rows.filter(r=>r.fase==='agendada').forEach(r=>{g.append('circle').attr('cx',x(r.id)).attr('cy',y(50)).attr('r',7).attr('fill','none').attr('stroke','var(--cds-chart-muted)').attr('stroke-width',1.5);g.append('text').attr('x',x(r.id)).attr('y',y(50)+4).attr('text-anchor','middle').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text('?');});
+    if(x.step()>=34){reais.forEach(r=>{g.append('text').attr('x',x(r.id)).attr('y',y(r.flavio)-7).attr('text-anchor','middle').attr('fill',cF).style('font-size','10px').text(fmt(r.flavio));g.append('text').attr('x',x(r.id)).attr('y',y(r.lula)+15).attr('text-anchor','middle').attr('fill',cL).style('font-size','10px').text(fmt(r.lula));});}
+    // rótulo final da média
+    const lastM=reais.filter(r=>med.has(r.id)&&med.get(r.id)[kL]!=null).slice(-1)[0];
+    if(lastM){const mm=med.get(lastM.id);const xe=W-mr+6;
+      g.append('line').attr('x1',x(lastM.id)).attr('x2',xe-2).attr('y1',y(mm[kF])).attr('y2',y(mm[kF])).attr('stroke',cF).attr('stroke-width',1).attr('stroke-dasharray','2 3');
+      g.append('line').attr('x1',x(lastM.id)).attr('x2',xe-2).attr('y1',y(mm[kL])).attr('y2',y(mm[kL])).attr('stroke',cL).attr('stroke-width',1).attr('stroke-dasharray','2 3');
+      g.append('text').attr('x',xe).attr('y',y(mm[kF])+4).attr('fill',cF).style('font-size','var(--cds-font-size-caption)').style('font-weight','var(--cds-font-weight-medium)').text(fmt(mm[kF]));
+      g.append('text').attr('x',xe).attr('y',y(mm[kL])+4).attr('fill',cL).style('font-size','var(--cds-font-size-caption)').style('font-weight','var(--cds-font-weight-medium)').text(fmt(mm[kL]));}
+    // tooltip
+    const hov=g.append('line').attr('y1',mt).attr('y2',H-mb).attr('stroke','var(--cds-chart-axis)').attr('stroke-width',1).style('display','none');
+    svg.append('rect').attr('x',ml).attr('y',mt).attr('width',W-ml-mr).attr('height',H-mt-mb).attr('fill','transparent')
+      .on('pointermove',ev=>{const [px]=d3.pointer(ev,svg.node());const sx=px;let best=null,bd=1e9;rows.forEach(r=>{const d=Math.abs(x(r.id)-sx);if(d<bd){bd=d;best=r;}});if(!best)return;
+        hov.style('display',null).attr('x1',x(best.id)).attr('x2',x(best.id));
+        tip.innerHTML='';const hd=document.createElement('div');hd.className='d';hd.textContent=best.inst+' · '+dmy(best.data);tip.appendChild(hd);
+        const line=(c,t)=>{const r=document.createElement('div');r.className='r';if(c){const s=document.createElement('i');s.className='pq-sw';s.style.background=c;r.appendChild(s);}r.appendChild(document.createTextNode(t));tip.appendChild(r);};
+        if(best.lula!=null){line(cF,'Flávio '+fmt(best.flavio)+'%');line(cL,'Lula '+fmt(best.lula)+'%');const mm=med.get(best.id);if(mm&&mm[kL]!=null)line(null,MODOS[win].longo+': '+fmt(mm[kF])+' × '+fmt(mm[kL]));}
+        else line(null,best.fase==='eleicao'?'Dia da eleição':'Agendada, ainda sem resultado');
+        tip.hidden=false;const bw=box.clientWidth,tx=x(best.id)*(bw/W);const tw=tip.offsetWidth;tip.style.left=Math.max(0,Math.min(bw-tw,tx+10))+'px';tip.style.top='8px';})
+      .on('pointerleave',()=>{tip.hidden=true;hov.style('display','none');});
+  }
+
+  setMarks();
+  dash.onData(draw);
+})();
+</script>
+
+</body>
+</html>
