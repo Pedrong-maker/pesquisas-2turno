@@ -132,6 +132,12 @@ body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-ant
         <button type="button" id="b3" aria-pressed="false">3 dias</button>
         <button type="button" id="b5" aria-pressed="false">5 dias</button>
       </div>
+      <div class="pq-toggle" role="group" aria-label="Institutos da tendência">
+        Tendência:
+        <button type="button" id="tT" aria-pressed="true">Todos</button>
+        <button type="button" id="t7" aria-pressed="false">7 principais</button>
+        <button type="button" id="t3" aria-pressed="false">3 de referência</button>
+      </div>
     </div>
     <div class="pq-chartbox" id="chart" data-source="pesquisas medias"></div>
   </section>
@@ -156,7 +162,7 @@ body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-ant
     <h2>Como ler</h2>
     <p>Os números são os divulgados pelos institutos, sem correção de viés. Testamos corrigir cada instituto pelo erro histórico, mas a correção afastava as pesquisas umas das outras em vez de aproximá-las, então ficou de fora.</p>
     <p>A média padrão é a aparada: usa só a pesquisa mais recente de cada instituto na última semana, para que quem publica mais não pese mais, e descarta os valores extremos dos dois lados. Assim ela não pula quando uma pesquisa isolada entra ou sai da conta. As médias simples de 3 e 5 dias ficam nos botões para comparar: a de 3 reage mais rápido, a de 5 é mais estável.</p>
-    <p>As retas cinza tracejadas são a tendência: a reta que melhor passa por todas as pesquisas desde o 1º turno (mínimos quadrados), sem média móvel, prolongada até o dia da eleição. Ela supõe que o ritmo de mudança continua igual. Como quase toda a queda do Flávio aconteceu entre 5 e 16/10 e depois a disputa ficou estável, a reta tende a exagerar o movimento recente.</p>
+    <p>Os botões de tendência escolhem quais institutos entram na reta: todos, os 7 principais (Datafolha, Quaest, AtlasIntel, PoderData, MDA, Ipespe e Nexus) ou só os 3 de referência (Datafolha, Quaest e AtlasIntel). As pesquisas que ficam de fora aparecem apagadas. As retas cinza tracejadas são a tendência: a reta que melhor passa por todas as pesquisas desde o 1º turno (mínimos quadrados), sem média móvel, prolongada até o dia da eleição. Ela supõe que o ritmo de mudança continua igual. Como quase toda a queda do Flávio aconteceu entre 5 e 16/10 e depois a disputa ficou estável, a reta tende a exagerar o movimento recente.</p>
     <p>As linhas pontilhadas verticais marcam os debates da Band (18/10) e da Globo (23/10). Pesquisas com campo terminado antes de um debate não captam o efeito dele.</p>
   </section>
 </div>
@@ -196,7 +202,12 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
       return [row('ap',t)].concat([3,5].map(d=>row(String(d),pos.filter(r=>last-r.dia<=d).map(r=>r.lula))));
     }});
 
-  let win='ap';
+  let win='ap',tset='todos';
+  const TSETS={todos:null,'7':['Datafolha','Quaest','AtlasIntel','PoderData','MDA','Ipespe','Nexus'],'3':['Datafolha','Quaest','AtlasIntel']};
+  const TNOME={todos:'todos',  '7':'7 principais','3':'3 de referência'};
+  const tnorm=s=>String(s).replace('CNT/','').replace('BTG/','');
+  const naTend=r=>!TSETS[tset]||TSETS[tset].includes(tnorm(r.inst));
+  [['tT','todos'],['t7','7'],['t3','3']].forEach(([id,v])=>document.getElementById(id).addEventListener('click',()=>{tset=v;[['tT','todos'],['t7','7'],['t3','3']].forEach(([i2,v2])=>document.getElementById(i2).setAttribute('aria-pressed',String(tset===v2)));draw();}));
   const MODOS={ap:{curto:'média aparada',longo:'Média aparada da última semana',nota:'média aparada da última semana: em cada ponto, a pesquisa mais recente de cada instituto nos 7 dias anteriores, descartando 15% dos valores mais altos e 15% dos mais baixos',fim:'média aparada'},
     '3':{curto:'média de 3 dias',longo:'Média simples dos últimos 3 dias',nota:'média simples das pesquisas dos 3 dias anteriores a cada ponto',fim:'média 3 dias'},
     '5':{curto:'média de 5 dias',longo:'Média simples dos últimos 5 dias',nota:'média simples das pesquisas dos 5 dias anteriores a cada ponto',fim:'média 5 dias'}};
@@ -285,19 +296,19 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
       g.append('path').datum(seg).attr('d',ln(kL)).attr('fill','none').attr('stroke',cL).attr('stroke-width',2.5).attr('stroke-dasharray','7 4');
     });
     // tendência: reta de mínimos quadrados das pesquisas depois do 1º turno, prolongada até a eleição
-    const tp=rows.filter(r=>r.fase==='pos'&&r.lula!=null);let trendF=null;
+    const tp=rows.filter(r=>r.fase==='pos'&&r.lula!=null&&naTend(r));let trendF=null;
     if(tp.length>=5){const mx=d3.mean(tp,r=>r.dia),my=d3.mean(tp,r=>r.flavio);const b=d3.sum(tp,r=>(r.dia-mx)*(r.flavio-my))/d3.sum(tp,r=>(r.dia-mx)**2);const a=my-b*mx;const fv=d=>a+b*d;trendF=d=>d>=tp[0].dia-0.01?fv(d):null;
       const i0=rows.indexOf(tp[0]);const seg=rows.slice(i0).filter(r=>r.fase!=='urna');
       const tl=k=>d3.line().x(r=>x(r.id)).y(r=>y(k(r.dia)));
       g.append('path').datum(seg).attr('d',tl(fv)).attr('fill','none').attr('stroke','var(--cds-chart-axis)').attr('stroke-width',2).attr('stroke-dasharray','6 4');
       g.append('path').datum(seg).attr('d',tl(d=>100-fv(d))).attr('fill','none').attr('stroke','var(--cds-chart-axis)').attr('stroke-width',2).attr('stroke-dasharray','6 4');
       const last=seg[seg.length-1];const pf=Math.round(fv(last.dia)*10)/10;
-      g.append('text').attr('x',x(last.id)-6).attr('y',y(Math.max(pf,100-pf)+3.2)).attr('text-anchor','end').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text('Tendência em '+dmy(last.data)+': '+fmt(pf)+' × '+fmt(100-pf));}
+      g.append('text').attr('x',x(last.id)-6).attr('y',y(Math.max(pf,100-pf)+3.2)).attr('text-anchor','end').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text('Tendência ('+TNOME[tset]+') em '+dmy(last.data)+': '+fmt(pf)+' × '+fmt(100-pf));}
     // pontos
     const reais=rows.filter(r=>(r.fase==='pre'||r.fase==='pos')&&r.lula!=null);
-    g.selectAll('circle.f').data(reais).join('circle').attr('cx',r=>x(r.id)).attr('cy',r=>y(r.flavio)).attr('r',3.5).attr('fill',cF).attr('fill-opacity',.55);
+    g.selectAll('circle.f').data(reais).join('circle').attr('cx',r=>x(r.id)).attr('cy',r=>y(r.flavio)).attr('r',3.5).attr('fill',cF).attr('fill-opacity',r=>r.fase!=='pos'||naTend(r)?.55:.12);
     const tri=d3.symbol(d3.symbolTriangle,44);
-    g.selectAll('path.l').data(reais).join('path').attr('d',tri).attr('transform',r=>`translate(${x(r.id)},${y(r.lula)})`).attr('fill',cL).attr('fill-opacity',.55);
+    g.selectAll('path.l').data(reais).join('path').attr('d',tri).attr('transform',r=>`translate(${x(r.id)},${y(r.lula)})`).attr('fill',cL).attr('fill-opacity',r=>r.fase!=='pos'||naTend(r)?.55:.12);
     // destaque da pesquisa mais recente
     const lr=reais[reais.length-1];
     if(lr&&lr.fase==='pos'){const lx=x(lr.id);
@@ -323,7 +334,7 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
         const line=(c,t)=>{const r=document.createElement('div');r.className='r';if(c){const s=document.createElement('i');s.className='pq-sw';s.style.background=c;r.appendChild(s);}r.appendChild(document.createTextNode(t));tip.appendChild(r);};
         if(best.lula!=null){line(cF,'Flávio '+fmt(best.flavio)+'%');line(cL,'Lula '+fmt(best.lula)+'%');const mm=med.get(best.id);if(mm&&mm[kL]!=null)line(null,MODOS[win].longo+': '+fmt(mm[kF])+' × '+fmt(mm[kL]));}
         else line(null,best.fase==='eleicao'?'Dia da eleição':'Agendada, ainda sem resultado');
-        const tv=trendF?trendF(best.dia):null;if(tv!=null)line(null,'Tendência (reta cinza): '+fmt(tv)+' × '+fmt(100-tv));
+        const tv=trendF?trendF(best.dia):null;if(tv!=null)line(null,'Tendência ('+TNOME[tset]+'): '+fmt(tv)+' × '+fmt(100-tv));
         tip.hidden=false;const bw=box.clientWidth,tx=x(best.id)*(bw/W);const tw=tip.offsetWidth;tip.style.left=Math.max(0,Math.min(bw-tw,tx+10))+'px';tip.style.top='8px';})
       .on('pointerleave',()=>{tip.hidden=true;hov.style('display','none');});
   }
