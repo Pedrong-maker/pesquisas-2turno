@@ -291,6 +291,8 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
       const tl=k=>d3.line().x(r=>x(r.id)).y(r=>y(k(r.dia)));
       g.append('path').datum(seg).attr('d',tl(fv)).attr('fill','none').attr('stroke','var(--cds-chart-axis)').attr('stroke-width',2).attr('stroke-dasharray','6 4');
       g.append('path').datum(seg).attr('d',tl(d=>100-fv(d))).attr('fill','none').attr('stroke','var(--cds-chart-axis)').attr('stroke-width',2).attr('stroke-dasharray','6 4');
+      const lab=seg[Math.round(seg.length*0.55)];
+      [[fv(lab.dia),-6,'tendência Flávio'],[100-fv(lab.dia),14,'tendência Lula']].forEach(([v,dy,t])=>g.append('text').attr('x',x(lab.id)).attr('y',y(v)+dy).attr('text-anchor','middle').attr('fill','var(--color-fg-muted)').attr('stroke','var(--color-panel)').attr('stroke-width',3).attr('paint-order','stroke').style('font-size','var(--cds-font-size-caption)').style('font-style','italic').text(t));
       const last=seg[seg.length-1];const pf=Math.round(fv(last.dia)*10)/10;
       g.append('text').attr('x',x(last.id)-6).attr('y',y(Math.max(pf,100-pf)+3.2)).attr('text-anchor','end').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text('Tendência em '+dmy(last.data)+': '+fmt(pf)+' × '+fmt(100-pf));}
     // pontos
