@@ -134,9 +134,9 @@ body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-ant
       </div>
       <div class="pq-toggle" role="group" aria-label="Institutos da tendência">
         Tendência:
-        <button type="button" id="tT" aria-pressed="true">Todos</button>
-        <button type="button" id="t7" aria-pressed="false">9 principais</button>
+        <button type="button" id="tT" aria-pressed="false">Todos</button>
         <button type="button" id="t3" aria-pressed="false">3 de referência</button>
+        <button type="button" id="t7" aria-pressed="true">9 principais</button>
       </div>
     </div>
     <div class="pq-chartbox" id="chart" data-source="pesquisas medias"></div>
@@ -162,7 +162,7 @@ body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-ant
     <h2>Como ler</h2>
     <p>Os números são os divulgados pelos institutos, sem correção de viés. Testamos corrigir cada instituto pelo erro histórico, mas a correção afastava as pesquisas umas das outras em vez de aproximá-las, então ficou de fora.</p>
     <p>A média padrão é a aparada: usa só a pesquisa mais recente de cada instituto na última semana, para que quem publica mais não pese mais, e descarta os valores extremos dos dois lados. Assim ela não pula quando uma pesquisa isolada entra ou sai da conta. As médias simples de 3 e 5 dias ficam nos botões para comparar: a de 3 reage mais rápido, a de 5 é mais estável.</p>
-    <p>Os botões de tendência escolhem quais institutos entram na reta: todos, os 9 principais (Datafolha, Quaest, AtlasIntel, PoderData, MDA, Ipespe, Nexus, Ideia e Paraná Pesquisas) ou só os 3 de referência (Datafolha, Quaest e AtlasIntel). As pesquisas que ficam de fora aparecem apagadas. As retas cinza tracejadas são a tendência: a reta que melhor passa por todas as pesquisas desde o 1º turno (mínimos quadrados), sem média móvel, prolongada até o dia da eleição. Ela supõe que o ritmo de mudança continua igual. Como quase toda a queda do Flávio aconteceu entre 5 e 16/10 e depois a disputa ficou estável, a reta tende a exagerar o movimento recente.</p>
+    <p>Os botões de tendência escolhem quais institutos entram na reta. O padrão são os 9 principais (Datafolha, Quaest, AtlasIntel, PoderData, MDA, Ipespe, Nexus, Ideia e Paraná Pesquisas); dá para usar também todos os institutos ou só os 3 de referência (Datafolha, Quaest e AtlasIntel). As pesquisas que ficam de fora aparecem apagadas. As retas cinza tracejadas são a tendência: a reta que melhor passa por todas as pesquisas desde o 1º turno (mínimos quadrados), sem média móvel, prolongada até o dia da eleição. Ela supõe que o ritmo de mudança continua igual. Como quase toda a queda do Flávio aconteceu entre 5 e 16/10 e depois a disputa ficou estável, a reta tende a exagerar o movimento recente.</p>
     <p>As linhas pontilhadas verticais marcam os debates da Band (18/10) e da Globo (23/10). Pesquisas com campo terminado antes de um debate não captam o efeito dele.</p>
   </section>
 </div>
@@ -202,7 +202,7 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
       return [row('ap',t)].concat([3,5].map(d=>row(String(d),pos.filter(r=>last-r.dia<=d).map(r=>r.lula))));
     }});
 
-  let win='ap',tset='todos';
+  let win='ap',tset='7';
   const TSETS={todos:null,'7':['Datafolha','Quaest','AtlasIntel','PoderData','MDA','Ipespe','Nexus','Ideia','Paraná Pesquisas'],'3':['Datafolha','Quaest','AtlasIntel']};
   const TNOME={todos:'todos',  '7':'9 principais','3':'3 de referência'};
   const tnorm=s=>String(s).replace('CNT/','').replace('BTG/','').replace('Meio/','');
