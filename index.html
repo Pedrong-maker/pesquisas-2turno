@@ -56,7 +56,7 @@ body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-ant
 .pq-legend span{display:inline-flex;align-items:center;gap:6px}
 .pq-sw{width:14px;height:3px;border-radius:2px;display:inline-block}
 .pq-dia{width:9px;height:9px;transform:rotate(45deg);background:var(--cds-chart-muted);display:inline-block}
-.pq-trend{width:16px;height:0;border-top:2px dotted var(--color-fg-muted);display:inline-block}
+.pq-trend{width:16px;height:0;border-top:2px dashed var(--cds-chart-axis);display:inline-block}
 .pq-ring{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--cds-chart-muted);display:inline-block;box-sizing:border-box}
 .pq-toggle{display:flex;gap:var(--cds-gap-xs);align-items:center;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
 .pq-toggle button{font:inherit;padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg);cursor:pointer}
@@ -123,7 +123,7 @@ body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-ant
         <span><i class="pq-sw" id="swF"></i>Flávio</span>
         <span><i class="pq-sw" id="swL"></i>Lula (tracejado)</span>
         <span><i class="pq-dia"></i>Urna 1º turno</span>
-        <span><i class="pq-trend"></i>Tendência (reta)</span>
+        <span><i class="pq-trend"></i>Tendência (reta cinza)</span>
         <span><i class="pq-ring"></i>Agendada</span>
       </div>
       <div class="pq-toggle" role="group" aria-label="Janela da média">
@@ -156,7 +156,7 @@ body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-ant
     <h2>Como ler</h2>
     <p>Os números são os divulgados pelos institutos, sem correção de viés. Testamos corrigir cada instituto pelo erro histórico, mas a correção afastava as pesquisas umas das outras em vez de aproximá-las, então ficou de fora.</p>
     <p>A média padrão é a aparada: usa só a pesquisa mais recente de cada instituto na última semana, para que quem publica mais não pese mais, e descarta os valores extremos dos dois lados. Assim ela não pula quando uma pesquisa isolada entra ou sai da conta. As médias simples de 3 e 5 dias ficam nos botões para comparar: a de 3 reage mais rápido, a de 5 é mais estável.</p>
-    <p>A reta pontilhada é a tendência: a reta que melhor passa por todas as pesquisas desde o 1º turno (mínimos quadrados), sem média móvel, prolongada até o dia da eleição. Ela supõe que o ritmo de mudança continua igual. Como quase toda a queda do Flávio aconteceu entre 5 e 16/10 e depois a disputa ficou estável, a reta tende a exagerar o movimento recente.</p>
+    <p>As retas cinza tracejadas são a tendência: a reta que melhor passa por todas as pesquisas desde o 1º turno (mínimos quadrados), sem média móvel, prolongada até o dia da eleição. Ela supõe que o ritmo de mudança continua igual. Como quase toda a queda do Flávio aconteceu entre 5 e 16/10 e depois a disputa ficou estável, a reta tende a exagerar o movimento recente.</p>
     <p>As linhas pontilhadas verticais marcam os debates da Band (18/10) e da Globo (23/10). Pesquisas com campo terminado antes de um debate não captam o efeito dele.</p>
   </section>
 </div>
@@ -289,8 +289,8 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
     if(tp.length>=5){const mx=d3.mean(tp,r=>r.dia),my=d3.mean(tp,r=>r.flavio);const b=d3.sum(tp,r=>(r.dia-mx)*(r.flavio-my))/d3.sum(tp,r=>(r.dia-mx)**2);const a=my-b*mx;const fv=d=>a+b*d;
       const i0=rows.indexOf(tp[0]);const seg=rows.slice(i0).filter(r=>r.fase!=='urna');
       const tl=k=>d3.line().x(r=>x(r.id)).y(r=>y(k(r.dia)));
-      g.append('path').datum(seg).attr('d',tl(fv)).attr('fill','none').attr('stroke',cF).attr('stroke-width',2).attr('stroke-dasharray','1 4').attr('stroke-linecap','round');
-      g.append('path').datum(seg).attr('d',tl(d=>100-fv(d))).attr('fill','none').attr('stroke',cL).attr('stroke-width',2).attr('stroke-dasharray','1 4').attr('stroke-linecap','round');
+      g.append('path').datum(seg).attr('d',tl(fv)).attr('fill','none').attr('stroke','var(--cds-chart-axis)').attr('stroke-width',2).attr('stroke-dasharray','6 4');
+      g.append('path').datum(seg).attr('d',tl(d=>100-fv(d))).attr('fill','none').attr('stroke','var(--cds-chart-axis)').attr('stroke-width',2).attr('stroke-dasharray','6 4');
       const last=seg[seg.length-1];const pf=Math.round(fv(last.dia)*10)/10;
       g.append('text').attr('x',x(last.id)-6).attr('y',y(Math.max(pf,100-pf)+3.2)).attr('text-anchor','end').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text('Tendência em '+dmy(last.data)+': '+fmt(pf)+' × '+fmt(100-pf));}
     // pontos
