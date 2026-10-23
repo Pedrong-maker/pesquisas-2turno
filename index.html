@@ -293,7 +293,7 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
     if(urna)vline(x(urna.id),'',"4 3");
     const lastReal=rc.filter(r=>r.lula!=null).slice(-1)[0];
     const nextIdx=rc.findIndex(r=>r.ordem>lastReal.ordem);
-    if(nextIdx>0)vline((x(lastReal.id)+x(rc[nextIdx].id))/2,'hoje',"4 3");
+    if(nextIdx>0)vline((x(lastReal.id)+x(rc[nextIdx].id))/2,narrow?'':'hoje',"4 3");
     DEBATES.forEach(d=>vline(posOf(d.dia),d.nome,"1 3"));
     const el=rc.find(r=>r.fase==='eleicao');if(el)vline(x(el.id),'2º turno',"4 3");
     // médias
@@ -326,7 +326,7 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
       g.append('path').attr('d',d3.symbol(d3.symbolTriangle,110)).attr('transform',`translate(${lx},${y(lr.lula)+2})`).attr('fill','none').attr('stroke',cL).attr('stroke-width',2);
       g.append('text').attr('x',lx-8).attr('y',y(Math.max(lr.flavio,lr.lula)+2.4)).attr('text-anchor','end').attr('fill','var(--color-fg)').style('font-size','var(--cds-font-size-caption)').style('font-weight','var(--cds-font-weight-medium)').text(lr.inst.split(' ')[0]+' '+dmy(lr.data)+': '+fmt(lr.flavio)+' × '+fmt(lr.lula));}
     if(urna){const dia=d3.symbol(d3.symbolDiamond,70);[urna.flavio,urna.lula].forEach(v=>g.append('path').attr('d',dia).attr('transform',`translate(${x(urna.id)},${y(v)})`).attr('fill','var(--cds-chart-muted)'));}
-    rc.filter(r=>r.fase==='agendada').forEach(r=>{g.append('circle').attr('cx',x(r.id)).attr('cy',y(50)).attr('r',narrow?5.5:7).attr('fill','none').attr('stroke','var(--cds-chart-muted)').attr('stroke-width',1.5);g.append('text').attr('x',x(r.id)).attr('y',y(50)+4).attr('text-anchor','middle').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text(r.n>1?String(r.n):'?');});
+    rc.filter(r=>r.fase==='agendada').forEach(r=>{g.append('circle').attr('cx',x(r.id)).attr('cy',y(50)).attr('r',narrow?4:7).attr('fill','none').attr('stroke','var(--cds-chart-muted)').attr('stroke-width',1.5);g.append('text').attr('x',x(r.id)).attr('y',y(50)+4).attr('text-anchor','middle').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text(narrow?'':(r.n>1?String(r.n):'?'));});
     if(x.step()>=34){reais.forEach(r=>{g.append('text').attr('x',x(r.id)).attr('y',y(r.flavio)-7).attr('text-anchor','middle').attr('fill',cF).style('font-size','10px').text(fmt(r.flavio));g.append('text').attr('x',x(r.id)).attr('y',y(r.lula)+15).attr('text-anchor','middle').attr('fill',cL).style('font-size','10px').text(fmt(r.lula));});}
     // rótulo final da média
     const lastM=reais.filter(r=>med.has(r.id)&&med.get(r.id)[kL]!=null).slice(-1)[0];
