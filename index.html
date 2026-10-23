@@ -270,7 +270,10 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
       if(r.fase==='agendada'&&p&&p.fase==='agendada'&&p.data===r.data){p.n++;p.inst+=', '+r.inst;}
       else rc.push(r.fase==='agendada'?Object.assign({},r,{n:1}):r);});}
     const ml=40,mr=narrow?44:56,mt=24,mb=narrow?78:96;
-    const x=d3.scalePoint(rc.map(r=>r.id),[ml,W-mr]).padding(0.5);
+    // no celular o eixo segue o calendário; no computador, uma posição por pesquisa
+    let x;
+    if(narrow){const dd=new Map(rc.map(r=>[r.id,r.dia]));const xt=d3.scaleLinear([d3.min(rc,r=>r.dia)-0.6,d3.max(rc,r=>r.dia)+0.4],[ml,W-mr]);x=id=>xt(dd.get(id));x.step=()=>0;}
+    else x=d3.scalePoint(rc.map(r=>r.id),[ml,W-mr]).padding(0.5);
     const ylo=narrow?44:42,yhi=narrow?56:58;const y=d3.scaleLinear([ylo,yhi],[H-mb,mt]);
     const svg=d3.select(box).append('svg').attr('width','100%').attr('viewBox',`0 0 ${W} ${H}`).attr('role','img').attr('aria-label','Pesquisas de segundo turno em votos válidos, com a média móvel');
     const g=svg.append('g');
@@ -323,7 +326,7 @@ const dash={calc:(n,o)=>{DATA[n]=o.fn(DATA.pesquisas);},data:n=>({status:'ok',da
       g.append('path').attr('d',d3.symbol(d3.symbolTriangle,110)).attr('transform',`translate(${lx},${y(lr.lula)+2})`).attr('fill','none').attr('stroke',cL).attr('stroke-width',2);
       g.append('text').attr('x',lx-8).attr('y',y(Math.max(lr.flavio,lr.lula)+2.4)).attr('text-anchor','end').attr('fill','var(--color-fg)').style('font-size','var(--cds-font-size-caption)').style('font-weight','var(--cds-font-weight-medium)').text(lr.inst.split(' ')[0]+' '+dmy(lr.data)+': '+fmt(lr.flavio)+' × '+fmt(lr.lula));}
     if(urna){const dia=d3.symbol(d3.symbolDiamond,70);[urna.flavio,urna.lula].forEach(v=>g.append('path').attr('d',dia).attr('transform',`translate(${x(urna.id)},${y(v)})`).attr('fill','var(--cds-chart-muted)'));}
-    rc.filter(r=>r.fase==='agendada').forEach(r=>{g.append('circle').attr('cx',x(r.id)).attr('cy',y(50)).attr('r',7).attr('fill','none').attr('stroke','var(--cds-chart-muted)').attr('stroke-width',1.5);g.append('text').attr('x',x(r.id)).attr('y',y(50)+4).attr('text-anchor','middle').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text(r.n>1?String(r.n):'?');});
+    rc.filter(r=>r.fase==='agendada').forEach(r=>{g.append('circle').attr('cx',x(r.id)).attr('cy',y(50)).attr('r',narrow?5.5:7).attr('fill','none').attr('stroke','var(--cds-chart-muted)').attr('stroke-width',1.5);g.append('text').attr('x',x(r.id)).attr('y',y(50)+4).attr('text-anchor','middle').attr('fill','var(--color-fg-muted)').style('font-size','var(--cds-font-size-caption)').text(r.n>1?String(r.n):'?');});
     if(x.step()>=34){reais.forEach(r=>{g.append('text').attr('x',x(r.id)).attr('y',y(r.flavio)-7).attr('text-anchor','middle').attr('fill',cF).style('font-size','10px').text(fmt(r.flavio));g.append('text').attr('x',x(r.id)).attr('y',y(r.lula)+15).attr('text-anchor','middle').attr('fill',cL).style('font-size','10px').text(fmt(r.lula));});}
     // rótulo final da média
     const lastM=reais.filter(r=>med.has(r.id)&&med.get(r.id)[kL]!=null).slice(-1)[0];
